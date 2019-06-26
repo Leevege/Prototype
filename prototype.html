@@ -117,7 +117,7 @@ function End(){
     sType.disabled = false;
 }
 function Submit(){
-    if(totalTime.startTime||totalTime.EndTime) return '已提交过了！';
+    if(!totalTime.startTime) {return;} //防止多次提交
     let oRows = document.createElement('tr');
     oRows.innerHTML = 
     `
