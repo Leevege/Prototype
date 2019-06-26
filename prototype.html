@@ -12,7 +12,8 @@
         #SubBtn{
             display: none;
         }
-        td + input{
+        #StartBtn{
+            color: white;
             background: blue;
         }
     </style>
@@ -57,6 +58,7 @@
                 <td>做了</td>
                 <td>类型</td>
                 <td>用时</td>
+                <td>备注</td>
             </thead>
             <tbody id="NeedData">
             </tbody>
@@ -115,6 +117,7 @@ function End(){
     sType.disabled = false;
 }
 function Submit(){
+    if(totalTime.startTime||totalTime.EndTime) return '已提交过了！';
     let oRows = document.createElement('tr');
     oRows.innerHTML = 
     `
@@ -148,20 +151,19 @@ function alterTime(time){
     }
     hour=Math.floor(hour)||'00';
     min=Math.floor(min)||'00';
-    hour=Inittime(hour);
-    min=Inittime(min);
-    sec=Inittime(sec)||'00';
-    // hour=((hour!='00')&&hour<10)?('0'+hour):hour;
-    // min=((min!='00')&&min<10)?('0'+min):min;
-    // sec=(sec<10)?('0'+sec):sec;
+    hour=timeToString(hour);
+    min=timeToString(min);
+    sec=timeToString(sec)||'00';
     return hour+':'+min+':'+sec;
 }
-function Inittime(time){
+function timeToString(time){
+    //时间转字符串的前置工作
     return ((time!='00')&&time<10)?('0'+time):time;
 }
 document.getElementById('test').onmouseover = function(){
-        document.getElementById('test').innerHTML = 
-        '总计学习用时：' + alterTime(totalTime.study) + '，总计娱乐用时：' + alterTime(totalTime.others);
+    //使总计结果显示在“test”中
+    document.getElementById('test').innerHTML = 
+    '总计学习用时：' + alterTime(totalTime.study) + '，总计娱乐用时：' + alterTime(totalTime.others);
 };
 </script>
 </body>
