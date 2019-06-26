@@ -12,6 +12,9 @@
         #SubBtn{
             display: none;
         }
+        td + input{
+            background: blue;
+        }
     </style>
 </head>
 <body>
@@ -69,9 +72,10 @@ const dataAppend = document.getElementById('NeedData');
 const totalTime = {
     study:0,
     others:0,
-    startTime:undefined,
-    EndTime:undefined,
+    startTime:undefined,// 表格中开始计时的详细时间
+    EndTime:undefined,// 表格中结束计时的详细时间
 };
+//初始化计时对象
 let t; // 计时器
 let [Timenow,Init,ST] = [0,0,0];
 function Start(){
@@ -80,6 +84,7 @@ function Start(){
     // 开始计时函数
     Timenow = new Date();
     totalTime.startTime = totalTime.startTime || Timenow;
+    // 简便写法，如果开始时间已存在就不再new Date对象
     if (Init === 0){
         //Init是初始时间
         Init = Timenow; 
@@ -97,6 +102,7 @@ function Start(){
     sType.disabled = true;
 }
 function End(){
+    // 结束计时函数
     totalTime.EndTime = new Date();
     clearTimeout(t);
     console.log('Finished');
