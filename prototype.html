@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Test</title>
+    <style>
+        #tab1{
+            margin-bottom: 100px;
+        }
+        #SubBtn{
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="test"></div>
+    <div id="UpperTable">
+        <table id="tab1" border="1" width="1000">
+            <thead>
+                <td></td>
+                <td>在做</td>
+                <td>类型</td>
+                <td>计时</td>
+            </thead>
+            <tbody>
+                <td>现在</td>
+                <td>
+                <select name="Doing" id="Doing">
+                    <option value="刷知乎">刷知乎</option>
+                    <option value="看微博">看微博</option>
+                    <option value="看视频">看视频</option>
+                    <option value="看书">看书</option>
+                    <option value="看网络课">看网络课</option>
+                    <option value="代码实战">代码实战</option>
+                </select>
+                </td>
+                <td>
+                <select name="Type" id="Type">
+                    <option value="【娱乐】">娱乐</option>
+                    <option value="【学习】">学习</option>
+                </select>
+                </td>
+                <td><input type="button" value="开始" onclick="Start()" id="StartBtn"><input type="button" value="提交" onclick="Submit()" id="SubBtn"></td>
+            </tbody>
+        </table>
+    </div>
+    <div id="LowerTable">
+        <table id="tab2" border="1" width="1000">
+            <thead>
+                <td>开始时间</td>
+                <td>结束时间</td>
+                <td>做了</td>
+                <td>类型</td>
+                <td>用时</td>
+            </thead>
+            <tbody id="NeedData">
+            </tbody>
+        </table>
+    </div>
+<script>
+'use strict';
+const oStartBtn = document.getElementById('StartBtn');
+const oSubmitBtn = document.getElementById('SubBtn');
+const sDoing = document.getElementById('Doing');
+const sType = document.getElementById('Type');
+const dataAppend = document.getElementById('NeedData');
+const totalTime = {
+    study:0,
+    others:0,
+    startTime:undefined,
+    EndTime:undefined,
+};
+let t; // 计时器
+let [Timenow,Init,ST] = [0,0,0];
+function Start(){
+    // 开始计时函数
+    console.log('start recording');
+    // 开始计时函数
+    Timenow = new Date();
+    totalTime.startTime = totalTime.startTime || Timenow;
+    if (Init === 0){
+        //Init是初始时间
+        Init = Timenow; 
+    }
+    Timenow = Timenow - Init; //用现在时间减保存的系统时间计算经过时间
+    ST = Math.floor(Timenow/1000);//去除小数点
+    document.getElementById('test').innerHTML = sDoing.value + '进行了' + ST + '秒，属于' + sType.value;
+    t = setTimeout('Start()',500);
+    oStartBtn.value = '结束';
+    oStartBtn.onclick = End;
+    oStartBtn.style.backgroundColor = 'Red';
+    oSubmitBtn.style.display = 'inline-block';
+    oSubmitBtn.disabled = true;
+    sDoing.disabled = true;
+    sType.disabled = true;
+}
+function End(){
+    totalTime.EndTime = new Date();
+    clearTimeout(t);
+    console.log('Finished');
+    oStartBtn.value = '开始';
+    oStartBtn.style.backgroundColor = 'Green';
+    oStartBtn.onclick = Start;
+    Init = 0;
+    oSubmitBtn.disabled = false;
+    sDoing.disabled = false;
+    sType.disabled = false;
+}
+function Submit(){
+    let oRows = document.createElement('tr');
+    oRows.innerHTML = 
+    `
+    <td>`+totalTime.startTime+`</td>
+    <td>`+totalTime.EndTime+`</td>
+    <td>`+sDoing.value+`</td>
+    <td>`+sType.value+`</td>
+    <td>`+alterTime(ST)+`</td>
+    `;
+    dataAppend.appendChild(oRows);
+    switch(sType.value){
+        case '【学习】': totalTime.study += ST; break;
+        case '【娱乐】': totalTime.others += ST; break;
+        default: console.log('Err!'); break;
+    }
+    totalTime.startTime = undefined;
+    totalTime.EndTime = undefined;
+}
+function alterTime(time){
+    // 将纯数字时间转化为字符串方便最后显示
+    let sec, min, hour;
+    if (time>60){
+    min = time / 60;
+    sec = time % 60;
+    if (min>60){
+        hour = min / 60;
+        min = min % 60;
+        }
+    } else {
+        sec = time;
+    }
+    hour=Math.floor(hour)||'00';
+    min=Math.floor(min)||'00';
+    hour=Inittime(hour);
+    min=Inittime(min);
+    sec=Inittime(sec)||'00';
+    // hour=((hour!='00')&&hour<10)?('0'+hour):hour;
+    // min=((min!='00')&&min<10)?('0'+min):min;
+    // sec=(sec<10)?('0'+sec):sec;
+    return hour+':'+min+':'+sec;
+}
+function Inittime(time){
+    return ((time!='00')&&time<10)?('0'+time):time;
+}
+document.getElementById('test').onmouseover = function(){
+        document.getElementById('test').innerHTML = 
+        '总计学习用时：' + alterTime(totalTime.study) + '，总计娱乐用时：' + alterTime(totalTime.others);
+};
+</script>
+</body>
+</html>
