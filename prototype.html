@@ -1,182 +1,209 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Test</title>
     <style>
-        #tab1{
-            margin-bottom: 100px;
+        #showTotal{
+            background-color: grey;
+            font-size: 2em;
+            text-align: center;
         }
-        #SubBtn{
+        table {
+            width: 100%;
+            margin: 10px auto;
+            border: 1px solid black;
+        }
+
+        #SubBtn {
             display: none;
         }
-        #StartBtn{
+
+        #StartBtn {
             color: white;
             background: blue;
         }
     </style>
 </head>
+
 <body>
-    <div id="test"></div>
+    <div id="showTotal"></div>
     <div id="UpperTable">
         <table id="tab1" border="1" width="1200">
             <thead>
-                <td></td>
-                <td>在做</td>
-                <td>类型</td>
-                <td>计时</td>
+                <tr>
+                    <td></td>
+                    <td>在做</td>
+                    <td>类型</td>
+                    <td>计时</td>
+                </tr>
             </thead>
             <tbody>
-                <td>现在</td>
-                <td>
-                <select name="Doing" id="Doing">
-                    <option value="刷知乎">刷知乎</option>
-                    <option value="看微博">看微博</option>
-                    <option value="看视频">看视频</option>
-                    <option value="看书">看书</option>
-                    <option value="看网络课">看网络课</option>
-                    <option value="代码实战">代码实战</option>
-                </select>
-                </td>
-                <td>
-                <select name="Type" id="Type">
-                    <option value="【娱乐】">娱乐</option>
-                    <option value="【学习】">学习</option>
-                </select>
-                </td>
-                <td><input type="button" value="开始" onclick="Start()" id="StartBtn"><input type="button" value="提交" onclick="Submit()" id="SubBtn"></td>
+                <tr>
+                    <td>现在</td>
+                    <td>
+                        <select name="Affairs" id="Affairs">
+                            <option value="刷知乎">刷知乎</option>
+                            <option value="看微博">看微博</option>
+                            <option value="看视频">看视频</option>
+                            <option value="看书">看书</option>
+                            <option value="看网络课">看网络课</option>
+                            <option value="代码实战">代码实战</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select name="AffairType" id="AffairType">
+                            <option value="【娱乐】">娱乐</option>
+                            <option value="【学习】">学习</option>
+                        </select>
+                    </td>
+                    <td><input type="button" value="开始" onclick="Start()" id="StartBtn"><input type="button" value="提交"
+                            onclick="Submit()" id="SubBtn"></td>
+                </tr>
             </tbody>
         </table>
     </div>
     <div id="LowerTable">
         <table id="tab2" border="1" width="1200">
             <thead>
-                <td>开始时间</td>
-                <td>结束时间</td>
-                <td>做了</td>
-                <td>类型</td>
-                <td>用时</td>
-                <td>备注</td>
+                <tr>
+                    <td>开始时间</td>
+                    <td>结束时间</td>
+                    <td>做了</td>
+                    <td>类型</td>
+                    <td>用时</td>
+                    <td>备注</td>
+                </tr>
             </thead>
-            <tbody id="NeedData">
+            <tbody id="outPutData">
             </tbody>
         </table>
     </div>
-<script>
-'use strict';
-let storageId = localStorage.length || 0;  // 用于存储数据
-const oStartBtn = document.getElementById('StartBtn');
-const oSubmitBtn = document.getElementById('SubBtn');
-const sDoing = document.getElementById('Doing');
-const sType = document.getElementById('Type');
-const dataAppend = document.getElementById('NeedData'); // 存放数据区域
-const totalTime = {
-    study:0,
-    others:0,
-    startTime:undefined,// 表格中开始计时的详细时间
-    EndTime:undefined,// 表格中结束计时的详细时间
-};
-for(let i = 0; i < localStorage.length; i++){
-    (function(){
-        let temp = document.createElement('tr');
-        temp.innerHTML = localStorage.getItem(i);
-        dataAppend.appendChild(temp);
-    })();
-    // 提取本地数据
-}
-//初始化计时对象
-let t; // 计时器
-let [Timenow,Init,ST] = [0,0,0];
-function Start(){
-    // 开始计时函数
-    console.log('start recording');
-    // 开始计时函数
-    Timenow = new Date();
-    totalTime.startTime = totalTime.startTime || Timenow;
-    // 简便写法，如果开始时间已存在就不再new Date对象
-    if (Init === 0){
-        //Init是初始时间
-        Init = Timenow; 
-    }
-    Timenow = Timenow - Init; //用现在时间减保存的系统时间计算经过时间
-    ST = Math.floor(Timenow/1000);//去除小数点
-    document.getElementById('test').innerHTML = sDoing.value + '进行了' + ST + '秒，属于' + sType.value;
-    t = setTimeout('Start()',500);
-    oStartBtn.value = '结束';
-    oStartBtn.onclick = End;
-    oStartBtn.style.backgroundColor = 'Red';
-    oSubmitBtn.style.display = 'inline-block';
-    oSubmitBtn.disabled = true;
-    sDoing.disabled = true;
-    sType.disabled = true;
-}
-function End(){
-    // 结束计时函数
-    totalTime.EndTime = new Date();
-    clearTimeout(t);
-    console.log('Finished');
-    oStartBtn.value = '开始';
-    oStartBtn.style.backgroundColor = 'Green';
-    oStartBtn.onclick = Start;
-    Init = 0;
-    oSubmitBtn.disabled = false;
-    sDoing.disabled = false;
-    sType.disabled = false;
-}
-function Submit(){
-    if(!totalTime.startTime) {return;} //防止多次提交同样的事件
-    let oRows = document.createElement('tr');
-    oRows.innerHTML = 
-    `
-    <td>`+totalTime.startTime+`</td>
-    <td>`+totalTime.EndTime+`</td>
-    <td>`+sDoing.value+`</td>
-    <td>`+sType.value+`</td>
-    <td>`+alterTime(ST)+`</td>
-    <td><textarea></textarea></td>
-    `;
-    localStorage.setItem(storageId++,oRows.innerHTML) // 存储数据
-    dataAppend.appendChild(oRows);
-    switch(sType.value){
-        // 计算总时间
-        case '【学习】': totalTime.study += ST; break;
-        case '【娱乐】': totalTime.others += ST; break;
-        default: console.log('Err!'); break;
-    }
-    totalTime.startTime = undefined;
-    totalTime.EndTime = undefined;
-}
-function alterTime(time){
-    // 将纯数字时间转化为字符串方便最后显示
-    let sec, min, hour;
-    if (time>60){
-    min = time / 60;
-    sec = time % 60;
-    if (min>60){
-        hour = min / 60;
-        min = min % 60;
+    <script>
+        'use strict';
+        localStorage ? console.log('你的浏览器支持本地数据存储功能') : alert('你的浏览器不支持存储数据！');
+        let storageId = localStorage.length || 0;  // 用于存储数据
+        const oStartBtn = document.getElementById('StartBtn');
+        const oSubmitBtn = document.getElementById('SubBtn');
+        const sAffairs = document.getElementById('Affairs');
+        const sAffType = document.getElementById('AffairType');
+        const oOutPutData = document.getElementById('outPutData'); // 存放数据区域
+        const totalTime = {
+            study: 0,
+            others: 0,
+            BeginAt: undefined,
+            EndAt: undefined,
+            // 表格中开始和结束计时的详细时间
+        };
+        // 在每次页面打开时提取本地数据
+        for (let i = 0; i < localStorage.length; i++) {
+            (function () {
+                let temp = document.createElement('tr');
+                temp.innerHTML = localStorage.getItem(i);
+                oOutPutData.appendChild(temp);
+            })();
         }
-    } else {
-        sec = time;
-    }
-    hour=Math.floor(hour)||'00';
-    min=Math.floor(min)||'00';
-    hour=timeToString(hour);
-    min=timeToString(min);
-    sec=timeToString(sec)||'00';
-    return hour+':'+min+':'+sec;
-}
-function timeToString(time){
-    //时间转字符串的前置工作
-    return ((time!='00')&&time<10)?('0'+time):time;
-}
-document.getElementById('test').onmouseover = function(){
-    //使统计结果显示在“test”中
-    document.getElementById('test').innerHTML = 
-    '总计学习用时：' + alterTime(totalTime.study) + '，总计娱乐用时：' + alterTime(totalTime.others);
-};
-</script>
+        //初始化计时对象
+        let oTimer; // 计时器
+        let [Timenow, Init, totalSec] = [0, 0, 0];
+        function Start() {
+            // 开始计时函数
+            console.log('start recording');
+            Timenow = new Date();
+            totalTime.BeginAt = totalTime.BeginAt || Timenow;
+            // 简便写法，如果开始时间已存在就不再new Date对象
+            if (Init === 0) {
+                //Init是初始时间
+                Init = Timenow;
+            }
+            Timenow = Timenow - Init; //用现在时间减保存的系统时间计算经过时间
+            totalSec = Math.floor(Timenow / 1000);//去除小数点
+            document.getElementById('showTotal').innerHTML = sAffairs.value + '进行了' + totalSec + '秒，属于' + sAffType.value;
+            alterBoolean(oSubmitBtn);
+            alterBoolean(sAffairs);
+            alterBoolean(sAffType);
+            oTimer = setTimeout('Start()', 500);
+            oStartBtn.value = '结束';
+            oStartBtn.onclick = End;
+            oStartBtn.style.backgroundColor = 'Red';
+            oSubmitBtn.style.display = 'inline-block';
+        }
+        function End() {
+            totalTime.EndAt = new Date();
+            clearTimeout(oTimer);
+            oTimer = null;
+            oStartBtn.value = '开始';
+            oStartBtn.style.backgroundColor = 'Green';
+            oStartBtn.onclick = Start;
+            Init = 0;
+            alterBoolean(oSubmitBtn);
+            alterBoolean(sAffairs);
+            alterBoolean(sAffType);
+        }
+        function alterBoolean(input) {
+            // 改变布尔值状态
+            if (oTimer) {
+                return;
+            } else {
+                input.disabled = !input.disabled;
+            }
+        }
+        function Submit() {
+            if (!totalTime.EndAt) return; //防止多次提交同样的事件
+            let oRows = document.createElement('tr');
+            oRows.innerHTML =
+            `
+            <td>`+ totalTime.BeginAt + `</td>
+            <td>`+ totalTime.EndAt + `</td>
+            <td>`+ sAffairs.value + `</td>
+            <td>`+ sAffType.value + `</td>
+            <td>`+ alterTime(totalSec) + `</td>
+            <td><textarea></textarea></td>
+            `;
+            localStorage.setItem(storageId++, oRows.innerHTML) // 提交的同时存储数据
+            oOutPutData.appendChild(oRows);
+            switch (sAffType.value) {
+                // 通过不同种类计算总时间
+                case '【学习】': totalTime.study += totalSec; break;
+                case '【娱乐】': totalTime.others += totalSec; break;
+                default: console.log('Err!'); break;
+            }
+            totalTime.BeginAt = undefined;
+            totalTime.EndAt = undefined;
+        }
+        function alterTime(nTime) {
+            // 将纯数字时间转化为字符串方便最后显示
+            let sec, min, hour;
+            if (nTime > 60) {
+                min = nTime / 60;
+                sec = nTime % 60;
+                if (min > 60) {
+                    hour = min / 60;
+                    min = min % 60;
+                }
+            } else {
+                sec = nTime;
+            }
+            hour = Math.floor(hour) || '00';
+            min = Math.floor(min) || '00';
+            hour = timeToString(hour);
+            min = timeToString(min);
+            sec = timeToString(sec) || '00';
+            return hour + ':' + min + ':' + sec;
+        }
+        function timeToString(nTime) {
+            //时间转字符串的前置工作
+            return ((nTime != '00') && nTime < 10) ? ('0' + nTime) : nTime;
+        }
+        document.getElementById('showTotal').onmouseover = function () {
+            //使统计结果显示在第一行
+            document.getElementById('showTotal').innerHTML =
+                '总计学习用时：' + alterTime(totalTime.study) + '，总计娱乐用时：' + alterTime(totalTime.others);
+        };
+    </script>
 </body>
+
 </html>
