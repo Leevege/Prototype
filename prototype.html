@@ -21,7 +21,7 @@
 <body>
     <div id="test"></div>
     <div id="UpperTable">
-        <table id="tab1" border="1" width="1000">
+        <table id="tab1" border="1" width="1200">
             <thead>
                 <td></td>
                 <td>在做</td>
@@ -51,7 +51,7 @@
         </table>
     </div>
     <div id="LowerTable">
-        <table id="tab2" border="1" width="1000">
+        <table id="tab2" border="1" width="1200">
             <thead>
                 <td>开始时间</td>
                 <td>结束时间</td>
@@ -66,17 +66,26 @@
     </div>
 <script>
 'use strict';
+let storageId = localStorage.length || 0;  // 用于存储数据
 const oStartBtn = document.getElementById('StartBtn');
 const oSubmitBtn = document.getElementById('SubBtn');
 const sDoing = document.getElementById('Doing');
 const sType = document.getElementById('Type');
-const dataAppend = document.getElementById('NeedData');
+const dataAppend = document.getElementById('NeedData'); // 存放数据区域
 const totalTime = {
     study:0,
     others:0,
     startTime:undefined,// 表格中开始计时的详细时间
     EndTime:undefined,// 表格中结束计时的详细时间
 };
+for(let i = 0; i < localStorage.length; i++){
+    (function(){
+        let temp = document.createElement('tr');
+        temp.innerHTML = localStorage.getItem(i);
+        dataAppend.appendChild(temp);
+    })();
+    // 提取本地数据
+}
 //初始化计时对象
 let t; // 计时器
 let [Timenow,Init,ST] = [0,0,0];
@@ -117,7 +126,7 @@ function End(){
     sType.disabled = false;
 }
 function Submit(){
-    if(!totalTime.startTime) {return;} //防止多次提交
+    if(!totalTime.startTime) {return;} //防止多次提交同样的事件
     let oRows = document.createElement('tr');
     oRows.innerHTML = 
     `
@@ -126,9 +135,12 @@ function Submit(){
     <td>`+sDoing.value+`</td>
     <td>`+sType.value+`</td>
     <td>`+alterTime(ST)+`</td>
+    <td><textarea></textarea></td>
     `;
+    localStorage.setItem(storageId++,oRows.innerHTML) // 存储数据
     dataAppend.appendChild(oRows);
     switch(sType.value){
+        // 计算总时间
         case '【学习】': totalTime.study += ST; break;
         case '【娱乐】': totalTime.others += ST; break;
         default: console.log('Err!'); break;
@@ -161,7 +173,7 @@ function timeToString(time){
     return ((time!='00')&&time<10)?('0'+time):time;
 }
 document.getElementById('test').onmouseover = function(){
-    //使总计结果显示在“test”中
+    //使统计结果显示在“test”中
     document.getElementById('test').innerHTML = 
     '总计学习用时：' + alterTime(totalTime.study) + '，总计娱乐用时：' + alterTime(totalTime.others);
 };
