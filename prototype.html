@@ -155,12 +155,13 @@
             if (!totalTime.EndAt) return; //防止多次提交同样的事件
             let oRows = document.createElement('tr');
             oRows.innerHTML =
+            // 应用模板字符串
             `
-            <td>`+ totalTime.BeginAt + `</td>
-            <td>`+ totalTime.EndAt + `</td>
-            <td>`+ sAffairs.value + `</td>
-            <td>`+ sAffType.value + `</td>
-            <td>`+ alterTime(totalSec) + `</td>
+            <td>${totalTime.BeginAt}</td>
+            <td>${totalTime.EndAt}</td>
+            <td>${sAffairs.value}</td>
+            <td>${sAffType.value}</td>
+            <td>${alterTime(totalSec)}</td>
             <td><textarea></textarea></td>
             `;
             localStorage.setItem(storageId++, oRows.innerHTML) // 提交的同时存储数据
