@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="./lib/normalize.css">
+    <link rel="stylesheet" href="./css/main.css">
+    <title>TO DO list</title>
+    <!-- 相关课程练习作品 -->
+</head>
+<body>
+    <div id="main">
+        <div class="navbar">
+            <h1>任务列表</h1>
+        </div>
+        <div class="header">
+            以下是你的任务列表
+        </div>
+        <form @submit.prevent="merge" id="task-form">
+            <div class="wrap">
+                <!-- 在这里输入标题 -->
+                <input v-model="current.title" id="task-input" type="text" autocomplete="off" placeholder="请输入标题，40个英文或20个中文以内">
+                <button type="submit">提交</button>
+            </div>
+        </form>
+        <div class="task-list">
+            <div class="wrap">
+                未完成
+                <div v-for="(todo,index) in list" class="item">
+                    {{todo.title}}
+                    <button @click="remove(todo.id)">删除</button>
+                    <button @click="set_current(todo)">更新</button>
+                </div>
+            </div>
+        </div>
+        <div class="task-list">
+            <div class="wrap">
+                已完成
+                <div class="complete item">
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./lib/vue.common.js"></script>
+    <script src="./js/PackStorage.js"></script>
+    <script src="./js/main.js"></script>
+</body>
+</html>

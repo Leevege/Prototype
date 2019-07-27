@@ -1,0 +1,53 @@
+* {
+    background-color:rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
+    position: relative;
+}
+/* 输入部分预设 */
+input, button{
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+    padding: 5px 10px;
+}
+input{
+    display: block;
+    width: 100%;
+}
+/* 包裹区预设 */
+.wrap{
+    max-width: 500px;
+    margin: 0 auto;
+}
+/* 导航栏预设 */
+.navbar, .header{
+    text-align: center;
+}
+.navbar{
+    background-color: blue;
+    color: white;
+    padding: 5px 0;
+}
+.navbar h1{
+    font-size: 24px;
+}
+/* 头部文字预设 */
+.header{
+    padding: 10px 0;
+}
+/* 任务列表预设 */
+.task-list{
+    padding-bottom: 30px;
+}
+/* 每条任务的预设 */
+.item{
+    line-height: 30px;
+    height: 30px;
+    width: 100%;
+}
+.item > button{
+    float: right;
+}
+.item > button::after{
+    content: "";
+    clear: both;
+}
