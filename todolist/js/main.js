@@ -1,5 +1,7 @@
 ;(function(){
     'use strict';
+    var Event = new Vue();
+    var alert_sound = document.getElementById('Alert');
     // 封装Object.assign方法
     function copy(obj){
         return Object.assign({},obj);
@@ -17,18 +19,68 @@
         }
         return len;
     }
+    // 组件化功能
+    Vue.component('task', {
+        template: '#task-tpl',
+        props: ['todo'],
+        methods: {
+            action: function(name, params){
+                Event.$emit(name, params);
+            }
+        }
+    })
     new Vue({
         el:'#main',
         data:{
             // 任务列表
             list:[],
+            last_id:0,
             // 当前文字输入区
             current:{},
         },
         mounted: function(){
+            var me = this;
             this.list = ms.get('list') || this.list;
+            this.last_id = ms.get('last_id') || this.last_id;
+            setInterval(function(){
+                me.check_alerts();
+            },1000);
+            Event.$on('remove', function(id){
+                if(id){
+                    me.remove(id);
+                }
+            });
+            Event.$on('toggle_complete', function(id){
+                if(id){
+                    me.toggle_complete(id);
+                }
+            });
+            Event.$on('set_current', function(id){
+                if(id){
+                    me.set_current(id);
+                }
+            });
+            Event.$on('toggle_detail', function(id){
+                if(id){
+                    me.toggle_detail(id);
+                }
+            });
         },
         methods:{
+            check_alerts: function(){
+                var me = this;
+                this.list.forEach(function(row,i){
+                    var alert_at = row.alert_at;
+                    if(!alert_at || row.alert_confirmed) return;
+                    alert_at = (new Date(alert_at)).getTime();
+                    var now = (new Date()).getTime();
+                    if(now <= alert_at){
+                        alert_sound.play();
+                        var confirmed = confirm('任务：'+row.title+'时间到！');
+                        Vue.set(me.list[i], 'alert_confirmed', confirmed);
+                    }
+                })
+            },
             // 用一个方法判断添加还是更新
             merge: function(){
                 var is_update, id;
@@ -45,17 +97,20 @@
                         return;
                     }
                     var todo = copy(this.current);
-                    todo.id = this.next_id();
+                    this.last_id++;
+                    ms.set('last_id', this.last_id);
+                    todo.id = this.last_id;
                     this.list.unshift(todo);
                 }
                 this.reset_current();
             },
+            toggle_detail: function(id){
+                var index = this.find_index(id);
+                Vue.set(this.list[index],'show_detail',!this.list[index].show_detail);
+            },
             remove: function(id){
                 var index = this.find_index(id);
                 this.list.splice(index,1);
-            },
-            next_id: function(){
-                return this.list.length + 1;
             },
             set_current: function(todo){
                 this.current = copy(todo);
@@ -69,6 +124,10 @@
                     return item.id == id;
                 });
             },
+            toggle_complete: function(id){
+                var i = this.find_index(id);
+                Vue.set(this.list[i], 'completed', !this.list[i].completed);
+            }
         },
         watch:{
             list:{
