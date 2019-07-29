@@ -23,8 +23,8 @@
 		}
 		h1{
 			color: white;
-			text-transform: uppercase;
 			font-weight: 500;
+			margin-bottom: 40px;
 		}
 		.box input[type = "text"], .box input[type = "password"]{
 			border: 0;
@@ -32,53 +32,48 @@
 			display: block;
 			margin: 20px auto;
 			text-align: center;
-			border: 2px solid #3498db;
+			border: 2px solid rgba(0, 102, 255, 0.5);
 			padding: 14px 10px;
-			width: 200px;
+			width: 218px;
 			outline: none;
 			color: black;
 			border-radius: 24px;
 		}
 		.box input[type = "text"]:focus, .box input[type = "password"]:focus{
-			border-color: #2ecc71;
+			border-color: rgba(0, 102, 255);
 			width: 280px;
 		}
-		.box input[type = "submit"]{
+		.box input[type = "submit"],
+		.box input[type = "button"]{
 			border: 0;
 			background-color: none;
-			display: block;
-			margin: 20px auto;
+			display: inline-block;
+			margin: 0 5px;
 			text-align: center;
-			border: 2px solid #2ecc71;
-			padding: 14px 40px;
+			border: 2px solid rgba(0, 102, 255);
+			padding: 15px 40px;
 			outline: none;
 			color: black;
 			border-radius: 24px;
 			transition: 0.25s;
 			cursor: pointer;
 		}
-		.box input[type = "submit"]:hover{
-			background-color: #2ecc71;
+		.box input[type = "submit"]:hover,
+		.box input[type = "button"]:hover{
+			background-color: rgba(0, 102, 255);
 			color: white;
-		}
-		#eye{
-			background-color: black;
-			width: 10px;
-			height: 10px;
-			border-radius: 50%;
-		}
-		span{
-			position: absolute;
-			right: 20px;
 		}
 	</style>
 </head>
 <body>
 	<form class="box" action="prototype.html" method="post">
-		<h1>Login</h1>
-		<input type="text" name="" autofocus placeholder="Username"/>
-		<input id="password" type="password" name="" placeholder="Password"/>
-		<input type="submit" name="" value="Login"/>
+		<h1>单页应用登录页演示</h1>
+		<input type="text" autofocus placeholder="请输入用户名"/>
+		<input id="password" type="password" placeholder="请输入密码"/>
+		<div>
+			<input type="submit" value="登录"/>
+			<input type="button" value="注册"/>
+		</div>
 	</form>
 </body>
 </html>

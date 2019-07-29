@@ -52,6 +52,9 @@ textarea{
 .solid-title{
     font-size: 24px;
 }
+.task-title{
+    font-family: Arial, Helvetica, sans-serif;
+}
 /* 每条任务的预设 */
 .item{
     position: relative;

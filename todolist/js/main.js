@@ -74,7 +74,7 @@
                     if(!alert_at || row.alert_confirmed) return;
                     alert_at = (new Date(alert_at)).getTime();
                     var now = (new Date()).getTime();
-                    if(now <= alert_at){
+                    if(now >= alert_at){
                         alert_sound.play();
                         var confirmed = confirm('任务：'+row.title+'时间到！');
                         Vue.set(me.list[i], 'alert_confirmed', confirmed);
