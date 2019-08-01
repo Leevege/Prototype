@@ -1,4 +1,6 @@
 * {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
     box-sizing: border-box;
     position: relative;
 }
@@ -12,7 +14,10 @@ input, button, textarea{
     border-radius: 3px;
     padding: 5px 10px;
 }
-input, textarea,.detail button{
+input:focus, textarea:focus {
+    border: 2px solid rgb(0, 102, 255);
+}
+input, textarea, .detail button, .detail{
     display: block;
     width: 100%;
 }
@@ -57,9 +62,9 @@ textarea{
 }
 /* 每条任务的预设 */
 .item{
-    position: relative;
+    background-color: rgba(0, 102, 255, 0.15);
     line-height: 30px;
-    height: 30px;
+    min-height: 30px;
     width: 100%;
 }
 
