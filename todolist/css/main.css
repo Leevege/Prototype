@@ -8,6 +8,34 @@
 #Alert{
     display: none;
 }
+/* 闹铃提示框设置 */
+.DONE{
+    display: none;
+    z-index: 100;
+    background-color: beige;
+    border: 1px solid rgb(0, 102, 255);
+    height: 200px;
+    width: 20%;
+    position: fixed;
+    top: 0;
+    left: 40%;
+}
+.DONE button, .DONE button:active{
+    display: block;
+    height: 30px;
+    width: 50%;
+    position: absolute;
+    left: 25%;
+    top: 150px;
+}
+.DONE button:hover{
+    background-color: rgb(0, 102, 255);
+    color: white;
+}
+.HintTitle{
+    padding-left: 10px;
+    padding-top: 10px;
+}
 /* 输入部分预设 */
 input, button, textarea{
     border: 1px solid rgba(0, 102, 255, 0.5);

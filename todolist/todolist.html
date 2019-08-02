@@ -13,6 +13,10 @@
 
 <body>
     <div id="main">
+        <div class="DONE">
+            <div class="HintTitle">（这里放的是任务到期介绍）</div>
+            <button>关闭</button>
+        </div>
         <div class="navbar">
             <h1>任务列表</h1>
         </div>
@@ -44,11 +48,15 @@
                     <div id="fin" @click="toggle_complete(todo.id)"></div>
                     <span class="task-title">{{todo.title}}</span>
                     <button @click="remove(todo.id)">删除</button>
+                    <button @click="toggle_detail(todo.id)">查看详情</button>
+                    <div v-if="todo.show_detail" class="detail">
+                                {{todo.desc || '暂未添加详情'}}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <audio id="Alert" src="./alert.mp3"></audio>
+    <audio id="Alert" src="./alert.mp3" controls></audio>
     <template id="task-tpl">
         <div class="item">
             <div id="not-fin" @click="action('toggle_complete',todo.id)"></div>
