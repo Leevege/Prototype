@@ -7,6 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>包含基本功能的俄罗斯方块</title>
     <style>
+        /* 主体样式 */
         .container {
             position: relative;
             width: 400px;
@@ -14,10 +15,32 @@
             margin: 0 auto;
         }
 
-        canvas {
-            width: 400px;
+        #GameArea {
+            position: absolute;
+            top: 0;
+            width: 280px;
             height: 400px;
-            margin: 0 auto;
+        }
+
+        #BlockArea,
+        #Scores {
+            position: absolute;
+            width: 120px;
+        }
+        
+        #BlockArea {
+            height: 120px;
+            left: 280px;
+        }
+        
+        #Scores {
+            right: 0;
+            height: 280px;
+            background-color: rgba(0, 100, 255, 0.5);
+            top: 120px;
+            text-align: center;
+            line-height: 25px;
+            font-size: 20px;
         }
 
         input {
@@ -46,12 +69,12 @@
             bottom: 0;
         }
 
-        .up:nth-child(4) {
+        .up:nth-child(6) {
             left: 0;
             bottom: 100px;
         }
 
-        .up:nth-child(5) {
+        .up:nth-child(7) {
             right: 0;
             bottom: 100px;
         }
@@ -75,7 +98,16 @@
 
 <body>
     <div class="container">
-        <canvas id="t1" width="400px" height="400px"></canvas>
+        <canvas id="GameArea" width="280px" height="400px"></canvas>
+        <canvas id="BlockArea" width="120px" height="120px"></canvas>
+        <div id="Scores">
+            <p>最高分:</p>
+            0<br>
+            <p>分数:</p>
+            0<br>
+            <p>速度:</p>
+            0<br>
+        </div>
         <input id="left" type="button" onclick="left()" value="👈">
         <input id="right" type="button" onclick="right()" value="👉">
         <input class="up" type="button" onclick="up()" value="👆">
@@ -85,10 +117,13 @@
     </div>
     <script>
         'use strict';
-        let canvas = document.getElementById('t1');
-        const ctx = canvas.getContext('2d');
+        let GameArea1 = document.getElementById('GameArea');
+        const ctx = GameArea1.getContext('2d');
+        let GameArea2 = document.getElementById('BlockArea');
+        const showBlock = GameArea2.getContext('2d');
+        let showScore = document.getElementById('Scores');
         let [aList, bg, bgColor] = [[], [], []];
-        let [tCurrent, tVirtual] = [{}, {}];
+        let [tCurrent,tnextBlock, tVirtual] = [{},{}, {}];
         let generate = true;
         // 让游戏更流畅的变量counter
         let counter = 0;
@@ -96,29 +131,27 @@
         const runTime = 30;
         let gameover = false;
         let Paused = false;
+        let highScore = 0;
         let score = 0;
         let scoreTemp = 0;
         let gameSpeed = 15;
+        let next = 0;
         initplayGround();
         initBlock();
         document.onkeyup = checkKey;
-        let playing = setInterval(checkGame, runTime);
+        let playing;
         // 游戏主函数
         function mainGame() {
-            if(score<9000){
-                if (scoreTemp % 1800 == 0&&scoreTemp!=0) {
-                gameSpeed--;
-                scoreTemp = 0;
-                }
-            }
+            updateSpeed();
             if (generate) {
-                tCurrent = aList[(Math.random() * 6).toFixed(0)];
+                tCurrent = aList[next];
                 tCurrent.idx = 0;
-                tCurrent.x = 8;
+                tCurrent.x = 5;
                 tCurrent.y = 0;
                 generate = false;
+                next = (Math.random() * 6).toFixed(0);
             }
-            tVirtual = JSON.parse(JSON.stringify(tCurrent));
+            tVirtual = copy(tCurrent);
             tVirtual.y = tCurrent.y + 1;
             tVirtual.x = tCurrent.x;
             tVirtual.idx = tCurrent.idx;
@@ -143,6 +176,15 @@
                 }
             }
             paint();
+            showScore.innerHTML = `
+            <p>最高分:</p>
+            ${highScore}<br>
+            <p>分数:</p>
+            ${score}<br>
+            <p>速度:</p>
+            ${16 - gameSpeed}<br>
+            `
+            nextBlock();
         }
         function checkGame() {
             if (!gameover) {
@@ -150,6 +192,7 @@
             } else {
                 clearInterval(playing);
                 playing = null;
+                score = 0;
                 alert('你输了！游戏结束！');
             }
         }
@@ -180,9 +223,9 @@
                 BlockType[i] = [];
             }
             //竖条
-            BlockType[0][0] = [[0, 0, 0, 0], [0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0]];
+            BlockType[0][0] = [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]];
             BlockType[0][1] = [[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0]];
-            BlockType[0][2] = [[0, 0, 0, 0], [0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0]];
+            BlockType[0][2] = [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]];
             BlockType[0][3] = [[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0]];
             BlockType[0].C = 'red';
             // 左L
@@ -204,10 +247,10 @@
             BlockType[3][3] = [[0, 1, 0, 0], [1, 1, 0, 0], [0, 1, 0, 0], [0, 0, 0, 0]];
             BlockType[3].C = 'green';
             // 方块
-            BlockType[4][0] = [[0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
-            BlockType[4][1] = [[0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
-            BlockType[4][2] = [[0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
-            BlockType[4][3] = [[0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+            BlockType[4][0] = [ [0, 0, 0, 0],[0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]];
+            BlockType[4][1] = [ [0, 0, 0, 0],[0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]];
+            BlockType[4][2] = [ [0, 0, 0, 0],[0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]];
+            BlockType[4][3] = [ [0, 0, 0, 0],[0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]];
             BlockType[4].C = 'blue';
             // 左Z
             BlockType[5][0] = [[0, 0, 0, 0], [0, 1, 1, 0], [0, 0, 1, 1], [0, 0, 0, 0]];
@@ -228,8 +271,9 @@
         function initplayGround() {
             const frameColor = 'black';
             const spaceColor = 'white';
-            var emptyBlock = new Array(18);
-            var colorBlock = new Array(18);
+            // 缩减场地
+            var emptyBlock = new Array(12);
+            var colorBlock = new Array(12);
             for (let i = 0; i < emptyBlock.length; i++) { emptyBlock[i] = 0; colorBlock[i] = spaceColor; }
             for (let i = 0; i < 19; i++) {
                 bg.push([20, ...emptyBlock, 20]);
@@ -241,7 +285,7 @@
             bgColor.push([frameColor, ...colorBlock, frameColor]);
         }
         function paint() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, GameArea1.width, GameArea1.height);
             ctx.beginPath();
             drawBackground(ctx);
             drawBlock(ctx);
@@ -263,7 +307,7 @@
                     if (tCurrent[tCurrent.idx][l][k] == 1) {
                         oData.fillStyle = tCurrent.C;
                         oData.fillRect((tCurrent.x + k) * basicWidth, (tCurrent.y + l) * basicWidth, basicWidth, basicWidth);
-                        oData.strokeStyle = 'white';
+                        oData.strokeStyle = 'black';
                         oData.rect((tCurrent.x + k) * basicWidth, (tCurrent.y + l) * basicWidth, basicWidth, basicWidth);
                     }
                     oData.stroke();
@@ -288,7 +332,7 @@
             for (var i = 2; i > 1; i--) {
                 var sum = 0;
                 // 方块产生点和大于0游戏结束
-                for (var j = 7; j < bg[0].length - 7; j++) {
+                for (var j = 5; j < bg[0].length - 5; j++) {
                     sum = sum + bg[i][j];
                 }
                 if (sum > 0) {
@@ -304,10 +348,11 @@
                 for (var j = 1; j < bg[0].length - 1; j++) {
                     sum = sum + bg[i][j];
                 }
-                if (sum == 180) {
+                // 注意加和
+                if (sum == 120) {
                     score += sum;
-                    scoreTemp +=sum;
-                    console.log('分数：', score);
+                    scoreTemp += sum;
+                    if (score > highScore) highScore = score;
                     for (var k = i; k > 0; k--) {
                         for (var l = 0; l < bg[0].length; l++) {
                             bg[k][l] = bg[k - 1][l];
@@ -317,6 +362,14 @@
                     i = bg.length - 2;
                 } else {
                     i--;
+                }
+            }
+        }
+        function updateSpeed(){
+            if (score < 6000) {
+                if (scoreTemp % 1200 == 0 && scoreTemp != 0) {
+                    gameSpeed--;
+                    scoreTemp = 0;
                 }
             }
         }
@@ -342,7 +395,7 @@
         }
         function left() {
             if (Paused) return;
-            tVirtual = JSON.parse(JSON.stringify(tCurrent));
+            tVirtual = copy(tCurrent);
             tVirtual.y = tCurrent.y;
             tVirtual.x = tCurrent.x - 1;
             tVirtual.idx = tCurrent.idx;
@@ -352,7 +405,7 @@
         }
         function up() {
             if (Paused) return;
-            tVirtual = JSON.parse(JSON.stringify(tCurrent));
+            tVirtual = copy(tCurrent);
             tVirtual.y = tCurrent.y;
             tVirtual.x = tCurrent.x;
             tVirtual.idx = (tCurrent.idx + 1) % 4;
@@ -362,7 +415,7 @@
         }
         function right() {
             if (Paused) return;
-            tVirtual = JSON.parse(JSON.stringify(tCurrent));
+            tVirtual = copy(tCurrent);
             tVirtual.y = tCurrent.y;
             tVirtual.x = tCurrent.x + 1;
             tVirtual.idx = tCurrent.idx;
@@ -372,13 +425,76 @@
         }
         function down() {
             if (Paused) return;
-            tVirtual = JSON.parse(JSON.stringify(tCurrent));
+            tVirtual = copy(tCurrent);
             tVirtual.y = tCurrent.y + 1;
             tVirtual.x = tCurrent.x;
             tVirtual.idx = tCurrent.idx;
             if (allowMove()) {
                 return tCurrent.y++;
             }
+        }
+        function nextBlock(){
+            // 另开数组防止引用同一指向以致于出BUG
+            let showArr = aList.concat();
+            let nextBg = []
+            let nextBgC = []
+            let emptyBlock = new Array(4);
+            let colorBlock = new Array(4);
+            const frameColor = 'blue';
+            const spaceColor = 'white';
+            const extraWidth = 280;
+            // 画上层
+            for (let i = 0; i < emptyBlock.length; i++) {
+                emptyBlock[i] = 10;
+                colorBlock[i] = frameColor;
+            }
+            nextBg.push([20, ...emptyBlock, 20]);
+            nextBgC.push([frameColor, ...colorBlock, frameColor]);
+            // 画中间
+            for (let i = 0; i < emptyBlock.length; i++) {
+                 emptyBlock[i] = 0;
+                 colorBlock[i] = spaceColor;
+            }
+            for (let i = 0; i < 4; i++) {
+                nextBg.push([20, ...emptyBlock, 20]);
+                nextBgC.push([frameColor, ...colorBlock, frameColor]);
+            }
+            // 画下层
+            for (let i = 0; i < emptyBlock.length; i++) {
+                emptyBlock[i] = 10;
+                colorBlock[i] = frameColor;
+            }
+            nextBg.push([20, ...emptyBlock, 20]);
+            nextBgC.push([frameColor, ...colorBlock, frameColor]);
+
+            showBlock.clearRect(0, 0, GameArea2.width, GameArea2.height);
+            showBlock.beginPath();
+            for (var i = 0; i < nextBg.length; i++) {
+                for (var j = 0; j < nextBg[0].length; j++) {
+                    showBlock.beginPath();
+                    showBlock.fillStyle = nextBgC[i][j];
+                    showBlock.rect(j * basicWidth, i * basicWidth, basicWidth, basicWidth);
+                    showBlock.fillRect(j * basicWidth, i * basicWidth, basicWidth, basicWidth);
+                }
+            }
+            tnextBlock = showArr[next];
+            tnextBlock.idx = 0;
+            tnextBlock.x = 1;
+            tnextBlock.y = 1;
+            for (let k = 0; k < 4; k++) {
+                for (let l = 0; l < 4; l++) {
+                    if (tnextBlock[tnextBlock.idx][l][k] == 1) {
+                        showBlock.fillStyle = tnextBlock.C;
+                        showBlock.fillRect((tnextBlock.x + k) * basicWidth, (tnextBlock.y + l) * basicWidth, basicWidth, basicWidth);
+                        showBlock.strokeStyle = 'black';
+                        showBlock.rect((tnextBlock.x + k) * basicWidth, (tnextBlock.y + l) * basicWidth, basicWidth, basicWidth);
+                    }
+                    showBlock.stroke();
+                }
+            }
+        }
+        function copy(obj){
+            return JSON.parse(JSON.stringify(obj));
         }
     </script>
 </body>
