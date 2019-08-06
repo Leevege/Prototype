@@ -72,7 +72,7 @@
                 var Me = this;
                 this.list.forEach(function (row, i) {
                     var alert_at = row.alert_at;
-                    if (!alert_at || row.alert_confirmed) return;
+                    if (!alert_at || row.alert_confirmed || Me.list[i].completed) return;
                     alert_at = (new Date(alert_at)).getTime();
                     var now = (new Date()).getTime();
                     if (now >= alert_at) {
@@ -87,7 +87,7 @@
                             DonePop.style.display = 'none';
                             confirmed = true;
                             Vue.set(Me.list[i], 'alert_confirmed', confirmed);
-                            if(confirmed) alert_sound.pause();
+                            if (confirmed) alert_sound.pause();
                         };
                     }
                 })
@@ -99,12 +99,15 @@
                 if (is_update) {
                     var index = this.find_index(id);
                     Vue.set(this.list, index, copy(this.current));
+                    // 想同时输入todo创造时间
+                    var now = (new Date()).getTime();
+                    Vue.set(this.list, 'createdTime', now);
                 } else {
                     var currentTitle = this.current.title;
                     if (!currentTitle && currentTitle !== 0) {
                         return;
                     } else if (getLenOfCNorEN(currentTitle) > 40) {
-                        alert('输入的字符太长，请缩减！');
+                        alert('输入的字符长度为' + getLenOfCNorEN(currentTitle) + '，请缩减！');
                         return;
                     }
                     var todo = copy(this.current);

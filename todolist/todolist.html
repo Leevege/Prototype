@@ -29,8 +29,8 @@
                 <input v-model="current.title" id="task-input" type="text" autocomplete="off"
                     placeholder="请输入标题，40个英文或20个中文以内">
                 <div v-if="current.id" class="detail">
-                    <textarea v-model="current.desc"></textarea>
-                    <input v-model="current.alert_at" type="datetime-local">
+                    <textarea v-model="current.desc" placeholder="请在这里输入任务详情"></textarea>
+                    <span>提醒时间：</span><input v-model="current.alert_at" type="datetime-local">
                     <button type="submit">提交</button>
                 </div>
             </div>
@@ -50,7 +50,7 @@
                     <button @click="remove(todo.id)">删除</button>
                     <button @click="toggle_detail(todo.id)">查看详情</button>
                     <div v-if="todo.show_detail" class="detail">
-                                {{todo.desc || '暂未添加详情'}}
+                        {{todo.desc || '暂未添加详情'}}
                     </div>
                 </div>
             </div>
@@ -60,7 +60,7 @@
     <template id="task-tpl">
         <div class="item">
             <div id="not-fin" @click="action('toggle_complete',todo.id)"></div>
-            <span class="task-title">{{todo.title}}</span>
+            <span class="task-title">{{todo.title}}{{todo.createdTime}}</span>
             <button @click="action('remove',todo.id)">删除</button>
             <button @click="action('set_current',todo)">更新</button>
             <button @click="action('toggle_detail',todo.id)">查看详情</button>

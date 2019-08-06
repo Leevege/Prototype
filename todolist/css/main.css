@@ -49,6 +49,19 @@ input, textarea, .detail button, .detail{
     display: block;
     width: 100%;
 }
+.detail input, .detail span{
+    display: inline-block;
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+}
+.detail span{
+    width: 20%;
+    background-color: rgba(0, 102, 255, 0.5);
+}
+.detail input{
+    width: 80%;
+}
 textarea{
     min-height: 100px;
 }
