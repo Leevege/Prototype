@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.8,maximum-scale=0.8,user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>包含基本功能的俄罗斯方块</title>
+    <style>
+        .container {
+            position: relative;
+            width: 400px;
+            height: 600px;
+            margin: 0 auto;
+        }
+
+        canvas {
+            width: 400px;
+            height: 400px;
+            margin: 0 auto;
+        }
+
+        input {
+            width: 100px;
+            height: 100px;
+            background-color: rgb(24, 110, 223);
+            border: 1px solid white;
+            border-radius: 5px;
+            position: absolute;
+            font-size: 50px;
+            text-align: center;
+        }
+
+        input:active {
+            background-color: green;
+            color: white;
+        }
+
+        #left {
+            left: 0;
+            bottom: 0;
+        }
+
+        #right {
+            right: 0;
+            bottom: 0;
+        }
+
+        .up:nth-child(4) {
+            left: 0;
+            bottom: 100px;
+        }
+
+        .up:nth-child(5) {
+            right: 0;
+            bottom: 100px;
+        }
+
+        #StartBtn,
+        #down {
+            left: 100px;
+            width: 200px;
+            font-size: 30px;
+        }
+
+        #down {
+            bottom: 0;
+        }
+
+        #StartBtn {
+            bottom: 100px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <canvas id="t1" width="400px" height="400px"></canvas>
+        <input id="left" type="button" onclick="left()" value="👈">
+        <input id="right" type="button" onclick="right()" value="👉">
+        <input class="up" type="button" onclick="up()" value="👆">
+        <input class="up" type="button" onclick="up()" value="👆">
+        <input id="StartBtn" type="button" onclick="startGame()" value="开始/暂停">
+        <input id="down" type="button" onclick="down()" value="加速">
+    </div>
+    <script>
+        'use strict';
+        let canvas = document.getElementById('t1');
+        const ctx = canvas.getContext('2d');
+        let [aList, bg, bgColor] = [[], [], []];
+        let [tCurrent, tVirtual] = [{}, {}];
+        let generate = true;
+        // 让游戏更流畅的变量counter
+        let counter = 0;
+        const basicWidth = 20;
+        const runTime = 30;
+        let gameover = false;
+        let Paused = false;
+        let score = 0;
+        let scoreTemp = 0;
+        let gameSpeed = 15;
+        initplayGround();
+        initBlock();
+        document.onkeyup = checkKey;
+        let playing = setInterval(checkGame, runTime);
+        // 游戏主函数
+        function mainGame() {
+            if(score<9000){
+                if (scoreTemp % 1800 == 0&&scoreTemp!=0) {
+                gameSpeed--;
+                scoreTemp = 0;
+                }
+            }
+            if (generate) {
+                tCurrent = aList[(Math.random() * 6).toFixed(0)];
+                tCurrent.idx = 0;
+                tCurrent.x = 8;
+                tCurrent.y = 0;
+                generate = false;
+            }
+            tVirtual = JSON.parse(JSON.stringify(tCurrent));
+            tVirtual.y = tCurrent.y + 1;
+            tVirtual.x = tCurrent.x;
+            tVirtual.idx = tCurrent.idx;
+            counter++;
+            counter = counter % gameSpeed;
+            if (counter == 0) {
+                if (allowMove()) {
+                    tCurrent.y++;
+                } else {
+                    // 拷贝到背景
+                    for (let k = 0; k < 4; k++) {
+                        for (let l = 0; l < 4; l++) {
+                            if (tCurrent[tCurrent.idx][k][l] == 1) {
+                                bg[tCurrent.y + k][tCurrent.x + l] = 10;
+                                bgColor[tCurrent.y + k][tCurrent.x + l] = tCurrent.C;
+                            }
+                        }
+                    }
+                    generate = true;
+                    isover();
+                    clearFilled();
+                }
+            }
+            paint();
+        }
+        function checkGame() {
+            if (!gameover) {
+                mainGame();
+            } else {
+                clearInterval(playing);
+                playing = null;
+                alert('你输了！游戏结束！');
+            }
+        }
+        function startGame() {
+            // 按下按钮开始/暂停游戏
+            if (gameover) {
+                [aList, bg, bgColor] = [[], [], []];
+                [tCurrent, tVirtual] = [{}, {}];
+                initplayGround();
+                initBlock();
+                playing = setInterval(checkGame, runTime);
+                gameover = false;
+            } else {
+                if (!playing) {
+                    Paused = false;
+                    playing = setInterval(checkGame, runTime);
+                } else {
+                    Paused = true;
+                    clearInterval(playing);
+                    playing = null;
+                }
+            }
+        }
+        // 初始化
+        function initBlock() {
+            var BlockType = new Object();
+            for (let i = 0; i < 7; i++) {
+                BlockType[i] = [];
+            }
+            //竖条
+            BlockType[0][0] = [[0, 0, 0, 0], [0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0]];
+            BlockType[0][1] = [[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0]];
+            BlockType[0][2] = [[0, 0, 0, 0], [0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0]];
+            BlockType[0][3] = [[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0]];
+            BlockType[0].C = 'red';
+            // 左L
+            BlockType[1][0] = [[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 1, 0], [0, 0, 0, 0]];
+            BlockType[1][1] = [[0, 0, 0, 0], [0, 1, 1, 1], [0, 1, 0, 0], [0, 0, 0, 0]];
+            BlockType[1][2] = [[0, 0, 0, 0], [0, 1, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0]];
+            BlockType[1][3] = [[0, 0, 0, 0], [0, 0, 1, 0], [1, 1, 1, 0], [0, 0, 0, 0]];
+            BlockType[1].C = 'yellow';
+            // 右L
+            BlockType[2][0] = [[0, 0, 1, 0], [0, 0, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]];
+            BlockType[2][1] = [[0, 0, 0, 0], [0, 1, 0, 0], [0, 1, 1, 1], [0, 0, 0, 0]];
+            BlockType[2][2] = [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 0, 0], [0, 1, 0, 0]];
+            BlockType[2][3] = [[0, 0, 0, 0], [1, 1, 1, 0], [0, 0, 1, 0], [0, 0, 0, 0]];
+            BlockType[2].C = 'orange';
+            // 凸起
+            BlockType[3][0] = [[0, 1, 0, 0], [1, 1, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+            BlockType[3][1] = [[0, 1, 0, 0], [0, 1, 1, 0], [0, 1, 0, 0], [0, 0, 0, 0]];
+            BlockType[3][2] = [[0, 0, 0, 0], [1, 1, 1, 0], [0, 1, 0, 0], [0, 0, 0, 0]];
+            BlockType[3][3] = [[0, 1, 0, 0], [1, 1, 0, 0], [0, 1, 0, 0], [0, 0, 0, 0]];
+            BlockType[3].C = 'green';
+            // 方块
+            BlockType[4][0] = [[0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+            BlockType[4][1] = [[0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+            BlockType[4][2] = [[0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+            BlockType[4][3] = [[0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+            BlockType[4].C = 'blue';
+            // 左Z
+            BlockType[5][0] = [[0, 0, 0, 0], [0, 1, 1, 0], [0, 0, 1, 1], [0, 0, 0, 0]];
+            BlockType[5][1] = [[0, 0, 1, 0], [0, 1, 1, 0], [0, 1, 0, 0], [0, 0, 0, 0]];
+            BlockType[5][2] = [[0, 0, 0, 0], [0, 1, 1, 0], [0, 0, 1, 1], [0, 0, 0, 0]];
+            BlockType[5][3] = [[0, 0, 1, 0], [0, 1, 1, 0], [0, 1, 0, 0], [0, 0, 0, 0]];
+            BlockType[5].C = 'lime';
+            // 右Z
+            BlockType[6][0] = [[0, 0, 0, 0], [0, 1, 1, 0], [1, 1, 0, 0], [0, 0, 0, 0]];
+            BlockType[6][1] = [[0, 1, 0, 0], [0, 1, 1, 0], [0, 0, 1, 0], [0, 0, 0, 0]];
+            BlockType[6][2] = [[0, 0, 0, 0], [0, 1, 1, 0], [1, 1, 0, 0], [0, 0, 0, 0]];
+            BlockType[6][3] = [[0, 1, 0, 0], [0, 1, 1, 0], [0, 0, 1, 0], [0, 0, 0, 0]];
+            BlockType[6].C = 'purple';
+            for (let i = 0; i < 7; i++) {
+                aList.push(BlockType[i]);
+            }
+        }
+        function initplayGround() {
+            const frameColor = 'black';
+            const spaceColor = 'white';
+            var emptyBlock = new Array(18);
+            var colorBlock = new Array(18);
+            for (let i = 0; i < emptyBlock.length; i++) { emptyBlock[i] = 0; colorBlock[i] = spaceColor; }
+            for (let i = 0; i < 19; i++) {
+                bg.push([20, ...emptyBlock, 20]);
+                bgColor.push([frameColor, ...colorBlock, frameColor]);
+            }
+            // push数组画游戏区域
+            for (let i = 0; i < emptyBlock.length; i++) { emptyBlock[i] = 10; colorBlock[i] = frameColor; }
+            bg.push([20, ...emptyBlock, 20]);
+            bgColor.push([frameColor, ...colorBlock, frameColor]);
+        }
+        function paint() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            drawBackground(ctx);
+            drawBlock(ctx);
+        }
+        function drawBackground(oData) {
+            for (var i = 0; i < bg.length; i++) {
+                for (var j = 0; j < bg[0].length; j++) {
+                    oData.beginPath();
+                    oData.fillStyle = bgColor[i][j];
+                    oData.rect(j * basicWidth, i * basicWidth, basicWidth, basicWidth);
+                    oData.fillRect(j * basicWidth, i * basicWidth, basicWidth, basicWidth);
+                    // oData.stroke();
+                }
+            }
+        }
+        function drawBlock(oData) {
+            for (let k = 0; k < 4; k++) {
+                for (let l = 0; l < 4; l++) {
+                    if (tCurrent[tCurrent.idx][l][k] == 1) {
+                        oData.fillStyle = tCurrent.C;
+                        oData.fillRect((tCurrent.x + k) * basicWidth, (tCurrent.y + l) * basicWidth, basicWidth, basicWidth);
+                        oData.strokeStyle = 'white';
+                        oData.rect((tCurrent.x + k) * basicWidth, (tCurrent.y + l) * basicWidth, basicWidth, basicWidth);
+                    }
+                    oData.stroke();
+                }
+            }
+        }
+        // 以下是边界条件判断
+        function allowMove() {
+            for (let k = 0; k < 4; k++) {
+                for (let l = 0; l < 4; l++) {
+                    if (tVirtual[tVirtual.idx][k][l] == 1) {
+                        if (tVirtual[tVirtual.idx][k][l] + bg[tVirtual.y + k][tVirtual.x + l] == 11 || tVirtual[tVirtual.idx][k][l] + bg[tVirtual.y + k][tVirtual.x + l] == 21) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+        function isover() {
+            // 比较最上面两行的相加结果
+            for (var i = 2; i > 1; i--) {
+                var sum = 0;
+                // 方块产生点和大于0游戏结束
+                for (var j = 7; j < bg[0].length - 7; j++) {
+                    sum = sum + bg[i][j];
+                }
+                if (sum > 0) {
+                    gameover = true;
+                }
+            }
+        }
+        function clearFilled() {
+            let i = bg.length - 2;
+            while (i > 1) {
+                var sum = 0;
+                // 从0开始会算上边框
+                for (var j = 1; j < bg[0].length - 1; j++) {
+                    sum = sum + bg[i][j];
+                }
+                if (sum == 180) {
+                    score += sum;
+                    scoreTemp +=sum;
+                    console.log('分数：', score);
+                    for (var k = i; k > 0; k--) {
+                        for (var l = 0; l < bg[0].length; l++) {
+                            bg[k][l] = bg[k - 1][l];
+                            bgColor[k][l] = bgColor[k - 1][l];
+                        }
+                    }
+                    i = bg.length - 2;
+                } else {
+                    i--;
+                }
+            }
+        }
+        // 以下是方向控制
+        function checkKey(e) {
+            e = e || event;
+            switch (e.keyCode) {
+                case 37:
+                    left();
+                    break;
+                case 38:
+                    up();
+                    break;
+                case 39:
+                    right();
+                    break;
+                case 40:
+                    down();
+                    break;
+                default:
+                    return;
+            }
+        }
+        function left() {
+            if (Paused) return;
+            tVirtual = JSON.parse(JSON.stringify(tCurrent));
+            tVirtual.y = tCurrent.y;
+            tVirtual.x = tCurrent.x - 1;
+            tVirtual.idx = tCurrent.idx;
+            if (allowMove()) {
+                return tCurrent.x--;
+            }
+        }
+        function up() {
+            if (Paused) return;
+            tVirtual = JSON.parse(JSON.stringify(tCurrent));
+            tVirtual.y = tCurrent.y;
+            tVirtual.x = tCurrent.x;
+            tVirtual.idx = (tCurrent.idx + 1) % 4;
+            if (allowMove()) {
+                return tCurrent.idx = (tCurrent.idx + 1) % 4;
+            }
+        }
+        function right() {
+            if (Paused) return;
+            tVirtual = JSON.parse(JSON.stringify(tCurrent));
+            tVirtual.y = tCurrent.y;
+            tVirtual.x = tCurrent.x + 1;
+            tVirtual.idx = tCurrent.idx;
+            if (allowMove()) {
+                return tCurrent.x++;
+            }
+        }
+        function down() {
+            if (Paused) return;
+            tVirtual = JSON.parse(JSON.stringify(tCurrent));
+            tVirtual.y = tCurrent.y + 1;
+            tVirtual.x = tCurrent.x;
+            tVirtual.idx = tCurrent.idx;
+            if (allowMove()) {
+                return tCurrent.y++;
+            }
+        }
+    </script>
+</body>
+
+</html>
