@@ -27,12 +27,12 @@
             position: absolute;
             width: 120px;
         }
-        
+
         #BlockArea {
             height: 120px;
             left: 280px;
         }
-        
+
         #Scores {
             right: 0;
             height: 280px;
@@ -123,7 +123,7 @@
         const showBlock = GameArea2.getContext('2d');
         let showScore = document.getElementById('Scores');
         let [aList, bg, bgColor] = [[], [], []];
-        let [tCurrent,tnextBlock, tVirtual] = [{},{}, {}];
+        let [tCurrent, tnextBlock, tVirtual] = [{}, {}, {}];
         let generate = true;
         // 让游戏更流畅的变量counter
         let counter = 0;
@@ -136,25 +136,17 @@
         let scoreTemp = 0;
         let gameSpeed = 15;
         let next = 0;
+        let newBlock = (Math.random() * 6).toFixed(0);
+        let playing;
         initplayGround();
         initBlock();
         document.onkeyup = checkKey;
-        let playing;
         // 游戏主函数
+        
         function mainGame() {
             updateSpeed();
-            if (generate) {
-                tCurrent = aList[next];
-                tCurrent.idx = 0;
-                tCurrent.x = 5;
-                tCurrent.y = 0;
-                generate = false;
-                next = (Math.random() * 6).toFixed(0);
-            }
-            tVirtual = copy(tCurrent);
-            tVirtual.y = tCurrent.y + 1;
-            tVirtual.x = tCurrent.x;
-            tVirtual.idx = tCurrent.idx;
+            createBlock();
+            nextBlock();
             counter++;
             counter = counter % gameSpeed;
             if (counter == 0) {
@@ -184,7 +176,6 @@
             <p>速度:</p>
             ${16 - gameSpeed}<br>
             `
-            nextBlock();
         }
         function checkGame() {
             if (!gameover) {
@@ -193,7 +184,7 @@
                 clearInterval(playing);
                 playing = null;
                 score = 0;
-                alert('你输了！游戏结束！');
+                alert('游戏结束！');
             }
         }
         function startGame() {
@@ -247,10 +238,10 @@
             BlockType[3][3] = [[0, 1, 0, 0], [1, 1, 0, 0], [0, 1, 0, 0], [0, 0, 0, 0]];
             BlockType[3].C = 'green';
             // 方块
-            BlockType[4][0] = [ [0, 0, 0, 0],[0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]];
-            BlockType[4][1] = [ [0, 0, 0, 0],[0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]];
-            BlockType[4][2] = [ [0, 0, 0, 0],[0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]];
-            BlockType[4][3] = [ [0, 0, 0, 0],[0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]];
+            BlockType[4][0] = [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]];
+            BlockType[4][1] = [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]];
+            BlockType[4][2] = [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]];
+            BlockType[4][3] = [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]];
             BlockType[4].C = 'blue';
             // 左Z
             BlockType[5][0] = [[0, 0, 0, 0], [0, 1, 1, 0], [0, 0, 1, 1], [0, 0, 0, 0]];
@@ -342,6 +333,7 @@
         }
         function clearFilled() {
             let i = bg.length - 2;
+            var mul = 1;
             while (i > 1) {
                 var sum = 0;
                 // 从0开始会算上边框
@@ -350,8 +342,8 @@
                 }
                 // 注意加和
                 if (sum == 120) {
-                    score += sum;
-                    scoreTemp += sum;
+                    score = 10*mul + score;
+                    scoreTemp = 10*mul + scoreTemp;
                     if (score > highScore) highScore = score;
                     for (var k = i; k > 0; k--) {
                         for (var l = 0; l < bg[0].length; l++) {
@@ -359,20 +351,106 @@
                             bgColor[k][l] = bgColor[k - 1][l];
                         }
                     }
+                    mul++;
                     i = bg.length - 2;
                 } else {
                     i--;
                 }
             }
         }
-        function updateSpeed(){
-            if (score < 6000) {
-                if (scoreTemp % 1200 == 0 && scoreTemp != 0) {
+        function updateSpeed() {
+            if (score < 3000) {
+                if ((scoreTemp - 200)>0 && scoreTemp != 0) {
+                    console.log('scoreTemp判断:',scoreTemp);
                     gameSpeed--;
                     scoreTemp = 0;
                 }
+            } else{
+                alert('I love you three thousand！');
+                gameover = true;
+                document.write('惊喜！谷歌搜索:<br><h1>(sqrt(cos(x))*cos(400*x)+sqrt(abs(x))-0.4)*(4-x*x)^0.1</h1>');
             }
         }
+        function createBlock(){
+            if (generate) {
+                next = newBlock;
+                tCurrent = aList[next];
+                tCurrent.idx = 0;
+                tCurrent.x = 5;
+                tCurrent.y = 0;
+                generate = false;
+                newBlock = (Math.random() * 6).toFixed(0);
+                while(next == newBlock){
+                    newBlock = (Math.random() * 6).toFixed(0);
+                }
+                // 下一个方块与目前方块不能重复，重复会出BUG，暂时没解决
+                console.log(next);
+            }
+            tVirtual = copy(tCurrent);
+            tVirtual.y = tCurrent.y + 1;
+            tVirtual.x = tCurrent.x;
+            tVirtual.idx = tCurrent.idx;
+        }
+        function nextBlock() {
+            let nextBg = [];
+            let nextBgC = [];
+            let emptyBlock = new Array(4);
+            let colorBlock = new Array(4);
+            const frameColor = 'blue';
+            const spaceColor = 'white';
+            // 画上层
+            for (let i = 0; i < emptyBlock.length; i++) {
+                emptyBlock[i] = 10;
+                colorBlock[i] = frameColor;
+            }
+            nextBg.push([20, ...emptyBlock, 20]);
+            nextBgC.push([frameColor, ...colorBlock, frameColor]);
+            // 画中间
+            for (let i = 0; i < emptyBlock.length; i++) {
+                emptyBlock[i] = 0;
+                colorBlock[i] = spaceColor;
+            }
+            for (let i = 0; i < 4; i++) {
+                nextBg.push([20, ...emptyBlock, 20]);
+                nextBgC.push([frameColor, ...colorBlock, frameColor]);
+            }
+            // 画下层
+            for (let i = 0; i < emptyBlock.length; i++) {
+                emptyBlock[i] = 10;
+                colorBlock[i] = frameColor;
+            }
+            nextBg.push([20, ...emptyBlock, 20]);
+            nextBgC.push([frameColor, ...colorBlock, frameColor]);
+
+            showBlock.clearRect(0, 0, GameArea2.width, GameArea2.height);
+            showBlock.beginPath();
+            //画背景
+            for (var i = 0; i < nextBg.length; i++) {
+                for (var j = 0; j < nextBg[0].length; j++) {
+                    showBlock.beginPath();
+                    showBlock.fillStyle = nextBgC[i][j];
+                    showBlock.rect(j * basicWidth, i * basicWidth, basicWidth, basicWidth);
+                    showBlock.fillRect(j * basicWidth, i * basicWidth, basicWidth, basicWidth);
+                }
+            }
+            tnextBlock = aList[newBlock];
+            tnextBlock.idx = 0;
+            tnextBlock.x = 1;
+            tnextBlock.y = 1;
+            // 画方块
+            for (let k = 0; k < 4; k++) {
+                for (let l = 0; l < 4; l++) {
+                    if (tnextBlock[tnextBlock.idx][l][k] == 1) {
+                        showBlock.fillStyle = tnextBlock.C;
+                        showBlock.fillRect((tnextBlock.x + k) * basicWidth, (tnextBlock.y + l) * basicWidth, basicWidth, basicWidth);
+                        showBlock.strokeStyle = 'black';
+                        showBlock.rect((tnextBlock.x + k) * basicWidth, (tnextBlock.y + l) * basicWidth, basicWidth, basicWidth);
+                    }
+                    showBlock.stroke();
+                }
+            }
+        }
+
         // 以下是方向控制
         function checkKey(e) {
             e = e || event;
@@ -433,67 +511,8 @@
                 return tCurrent.y++;
             }
         }
-        function nextBlock(){
-            // 另开数组防止引用同一指向以致于出BUG
-            let showArr = aList.concat();
-            let nextBg = []
-            let nextBgC = []
-            let emptyBlock = new Array(4);
-            let colorBlock = new Array(4);
-            const frameColor = 'blue';
-            const spaceColor = 'white';
-            const extraWidth = 280;
-            // 画上层
-            for (let i = 0; i < emptyBlock.length; i++) {
-                emptyBlock[i] = 10;
-                colorBlock[i] = frameColor;
-            }
-            nextBg.push([20, ...emptyBlock, 20]);
-            nextBgC.push([frameColor, ...colorBlock, frameColor]);
-            // 画中间
-            for (let i = 0; i < emptyBlock.length; i++) {
-                 emptyBlock[i] = 0;
-                 colorBlock[i] = spaceColor;
-            }
-            for (let i = 0; i < 4; i++) {
-                nextBg.push([20, ...emptyBlock, 20]);
-                nextBgC.push([frameColor, ...colorBlock, frameColor]);
-            }
-            // 画下层
-            for (let i = 0; i < emptyBlock.length; i++) {
-                emptyBlock[i] = 10;
-                colorBlock[i] = frameColor;
-            }
-            nextBg.push([20, ...emptyBlock, 20]);
-            nextBgC.push([frameColor, ...colorBlock, frameColor]);
-
-            showBlock.clearRect(0, 0, GameArea2.width, GameArea2.height);
-            showBlock.beginPath();
-            for (var i = 0; i < nextBg.length; i++) {
-                for (var j = 0; j < nextBg[0].length; j++) {
-                    showBlock.beginPath();
-                    showBlock.fillStyle = nextBgC[i][j];
-                    showBlock.rect(j * basicWidth, i * basicWidth, basicWidth, basicWidth);
-                    showBlock.fillRect(j * basicWidth, i * basicWidth, basicWidth, basicWidth);
-                }
-            }
-            tnextBlock = showArr[next];
-            tnextBlock.idx = 0;
-            tnextBlock.x = 1;
-            tnextBlock.y = 1;
-            for (let k = 0; k < 4; k++) {
-                for (let l = 0; l < 4; l++) {
-                    if (tnextBlock[tnextBlock.idx][l][k] == 1) {
-                        showBlock.fillStyle = tnextBlock.C;
-                        showBlock.fillRect((tnextBlock.x + k) * basicWidth, (tnextBlock.y + l) * basicWidth, basicWidth, basicWidth);
-                        showBlock.strokeStyle = 'black';
-                        showBlock.rect((tnextBlock.x + k) * basicWidth, (tnextBlock.y + l) * basicWidth, basicWidth, basicWidth);
-                    }
-                    showBlock.stroke();
-                }
-            }
-        }
-        function copy(obj){
+        // 以下是方法包装
+        function copy(obj) {
             return JSON.parse(JSON.stringify(obj));
         }
     </script>
